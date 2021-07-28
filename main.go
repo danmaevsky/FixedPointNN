@@ -14,6 +14,7 @@ import (
 	"os"
 	"strconv"
 	"time"
+	"gonum.org/v1/gonum/mat"
 )
 
 func main() {
@@ -21,6 +22,7 @@ func main() {
 	// 100 hidden nodes - an arbitrary number
 	// 10 outputs - digits 0 to 9
 	// 0.1 is the learning rate
+	fmt.Printf("Begin process!");
 	net := CreateNetwork(784, 100, 10, 0.0005);
 
 	mnist := flag.String("mnist", "", "Either train or predict to evaluate neural network");
@@ -54,8 +56,27 @@ func main() {
 func mnistTrain(net *Network) {
 	rand.Seed(time.Now().UTC().UnixNano());
 	t1 := time.Now();
+
+	weightsFile, _ := os.Create("weights.csv")
+	weightsFile.WriteString("epoch,(hid) min,(hid) max,(hid) range,(out) min,(out) max,(out) range\n")
+
+
 	//fmt.Println("\n\nHidden Weights: ", net.hiddenWeights.At(0,500), "\n\n");
-	for epochs := 0; epochs < 5; epochs++ {
+	for epochs := 0; epochs < 40; epochs++ {
+		fmt.Printf("\nEpoch: %s", int(epochs));	
+
+		hiddenMaxWeight := mat.Max(net.hiddenWeights)
+		hiddenMinWeight := mat.Min(net.hiddenWeights)
+		hiddenDynRange := hiddenMaxWeight - hiddenMinWeight
+
+		outMaxWeight := mat.Max(net.outputWeights)
+		outMinWeight := mat.Min(net.outputWeights)
+		outDynRange := outMaxWeight - outMinWeight
+
+		dynamicString := fmt.Sprintf("%d,%f,%f,%f,%f,%f,%f\n", epochs, hiddenMinWeight, hiddenMaxWeight, hiddenDynRange, outMinWeight, outMaxWeight, outDynRange)
+		weightsFile.WriteString(dynamicString)
+
+
 		testFile, _ := os.Open("mnist_dataset/mnist_train.csv");
 		r := csv.NewReader(bufio.NewReader(testFile));
 		for {
@@ -70,7 +91,6 @@ func mnistTrain(net *Network) {
 				inputs[i] = (x / 255.0 * 9.99) + 0.01;
 				//inputs[i] = x + 1
 			}
-			//fmt.Println("inputs: ", inputs);
 
 			targets := make([]float64, 10);
 			for i := range targets {
