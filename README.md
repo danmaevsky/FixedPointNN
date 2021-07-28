@@ -1,4 +1,7 @@
-# MLFPGA
-# This project is to explore how we can use an FPGA to accelerate Machine Learning. The project is written in Go, for easy translation to verilog. 
-# For now, the goal is to eliminate floating point arithmetic to make the computations faster on the FPGA. This is done by using a ReLU activation function
-# instead of sigmoid, and slowly replacing all of the floating point numbers with integers.
+# Fixed Point Neural Networks
+# Part of the WINLAB Summer 2021 Research Internship -Binary Neural Networks Group
+
+It is vital to understand the dynamic range of the weights within our network to reasonably estimate the size that our fixed-point implementation should be. By observing the graphs below, we determined that a 16-bit integer and 48-bit fraction should more than suffice for our implementation.
+
+[plot](./imgs/w1_range.png)
+[plot](./imgs/w2_range.png)
